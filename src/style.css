@@ -1,0 +1,449 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: #f4f4f5;
+}
+
+.login-box {
+  max-width: 320px;
+  margin: 100px auto;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.login-box input {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.login-box button {
+  width: 100%;
+  padding: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.form-box {
+  max-width: 400px;
+  margin: 30px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.form-box label {
+  display: block;
+  margin-top: 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+.form-box input, .form-box select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 4px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.form-box button {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.success {
+  color: green;
+  font-weight: bold;
+}
+
+.tabs {
+  display: flex;
+  max-width: 400px;
+  margin: 20px auto 0;
+  gap: 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.loans-list {
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.loan-card {
+  background: white;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  font-size: 14px;
+}
+
+.loan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.loan-status {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: white;
+}
+
+.status-Outstanding { background: #dc2626; }
+.status-PartiallyPaid { background: #d97706; }
+.status-Settled { background: #16a34a; }
+
+.loan-notes {
+  color: #777;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.dashboard {
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.dash-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.dash-card h2 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #555;
+}
+
+.dash-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 15px;
+}
+
+.dash-total {
+  border-top: 1px solid #eee;
+  margin-top: 6px;
+  padding-top: 10px;
+  font-weight: bold;
+}
+
+.pos { color: #16a34a; }
+.neg { color: #dc2626; }
+
+.history {
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.history-row {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  font-size: 14px;
+}
+
+.history-row-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+}
+
+.history-row-bottom {
+  color: #777;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.history-notes {
+  color: #999;
+  font-size: 12px;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.load-more-btn {
+  width: 100%;
+  padding: 10px;
+  background: white;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.settings {
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.settings-row .rename-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.settings-row .rename-btn {
+  padding: 8px 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.settings-row .tag {
+  font-size: 11px;
+  background: #eee;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.inline-add-form {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eee;
+}
+
+.inline-add-form input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.inline-add-form button {
+  width: 100%;
+  padding: 10px;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.filter-box {
+  margin-bottom: 20px;
+}
+
+.filter-box label {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #555;
+}
+
+.filter-box select, .filter-box input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.filter-box button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#apply-filters-btn {
+  background: #2563eb;
+  color: white;
+}
+
+.secondary-btn {
+  background: white;
+  border: 1px solid #ccc !important;
+  color: #555;
+}
+
+.settings-row .rename-btn {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.history-row {
+  cursor: pointer;
+}
+
+.history-row.locked {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.loan-lock-note {
+  color: #d97706;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.danger-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  background: white;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.app-title {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.loan-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.loan-card-actions button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  background: white;
+}
+
+.loan-edit-btn {
+  color: #2563eb;
+  border-color: #2563eb !important;
+}
+
+.loan-delete-btn {
+  color: #dc2626;
+  border-color: #dc2626 !important;
+}
+
+.repayments-list {
+  margin-top: 8px;
+  border-top: 1px dashed #eee;
+  padding-top: 6px;
+}
+
+.repayment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #666;
+  padding: 3px 0;
+}
+
+.repayment-delete-btn {
+  background: none;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 6px;
+}
