@@ -447,3 +447,22 @@ body {
   font-size: 13px;
   padding: 2px 6px;
 }
+
+/* Category kind dropdown (Settings) */
+.settings-row .kind-select {
+  width: auto;
+  flex-shrink: 0;
+  margin-top: 0;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.inline-add-form .kind-select-full {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}

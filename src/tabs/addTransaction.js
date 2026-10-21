@@ -13,13 +13,19 @@ export async function renderAddTransactionTab() {
         <input type="text" id="description" required />
 
         <label>Category</label>
-        <select id="category" required></select>
+        <select id="category" required>
+          <option value="">-- select --</option>
+        </select>
 
         <label>From Account</label>
-        <select id="from_account" required></select>
+        <select id="from_account" required>
+          <option value="">-- select --</option>
+        </select>
 
         <label>To Account</label>
-        <select id="to_account" required></select>
+        <select id="to_account" required>
+          <option value="">-- select --</option>
+        </select>
 
         <label>Amount</label>
         <input type="number" id="amount" step="0.01" required />
@@ -51,6 +57,37 @@ export async function renderAddTransactionTab() {
     toSelect.innerHTML += `<option value="${a.id}">${a.name}</option>`
   })
 
+  // --- Category auto-fill ---
+  // Expense category  -> To account = External (money leaves your accounts)
+  // Income category   -> From account = External (money comes in)
+  // Transfer / other  -> nothing is filled in; you pick both accounts.
+  const externalAccount =
+    accounts.find(a => a.name === 'External') || accounts.find(a => a.is_external)
+
+  // Remember which side we filled in ourselves, so we only clear
+  // values we set (never something you picked by hand).
+  let autoFrom = false
+  let autoTo = false
+
+  fromSelect.addEventListener('change', () => { autoFrom = false })
+  toSelect.addEventListener('change', () => { autoTo = false })
+
+  categorySelect.addEventListener('change', () => {
+    if (autoFrom) { fromSelect.value = ''; autoFrom = false }
+    if (autoTo) { toSelect.value = ''; autoTo = false }
+
+    const category = categories.find(c => String(c.id) === categorySelect.value)
+    if (!category || !externalAccount) return
+
+    if (category.kind === 'expense') {
+      toSelect.value = String(externalAccount.id)
+      autoTo = true
+    } else if (category.kind === 'income') {
+      fromSelect.value = String(externalAccount.id)
+      autoFrom = true
+    }
+  })
+
   document.getElementById('tx-form').addEventListener('submit', async (e) => {
     e.preventDefault()
     const statusEl = document.getElementById('save-status')
@@ -73,6 +110,8 @@ export async function renderAddTransactionTab() {
       statusEl.className = 'success'
       document.getElementById('tx-form').reset()
       document.getElementById('date').value = today
+      autoFrom = false
+      autoTo = false
       setTimeout(() => { statusEl.textContent = '' }, 2000)
     }
   })

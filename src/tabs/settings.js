@@ -1,5 +1,19 @@
 import { supabase } from '../../supabaseClient.js'
 
+// Category kinds drive the auto-fill on the Add Transaction tab.
+const CATEGORY_KINDS = [
+  ['expense', 'Expense'],
+  ['income', 'Income'],
+  ['transfer', 'Transfer'],
+  ['other', 'Other'],
+]
+
+function kindOptions(selected) {
+  return CATEGORY_KINDS
+    .map(([value, label]) => `<option value="${value}"${value === selected ? ' selected' : ''}>${label}</option>`)
+    .join('')
+}
+
 export async function renderSettingsTab() {
   const content = document.getElementById('tab-content')
   content.innerHTML = `
@@ -22,6 +36,9 @@ export async function renderSettingsTab() {
         <div id="categories-list"></div>
         <form id="add-category-form" class="inline-add-form">
           <input type="text" id="new-category-name" placeholder="New category name" required />
+          <select id="new-category-kind" class="kind-select kind-select-full">
+            ${kindOptions('expense')}
+          </select>
           <button type="submit">Add Category</button>
         </form>
         <p id="category-status"></p>
@@ -56,8 +73,9 @@ export async function renderSettingsTab() {
     e.preventDefault()
     const statusEl = document.getElementById('category-status')
     const name = document.getElementById('new-category-name').value.trim()
+    const kind = document.getElementById('new-category-kind').value
 
-    const { error } = await supabase.from('categories').insert({ name })
+    const { error } = await supabase.from('categories').insert({ name, kind })
 
     if (error) {
       statusEl.textContent = 'Error: ' + error.message
@@ -118,6 +136,7 @@ async function loadCategoriesList() {
   listEl.innerHTML = categories.map(c => `
     <div class="settings-row" data-id="${c.id}" data-type="category">
       <input type="text" class="rename-input" value="${c.name.replace(/"/g, '&quot;')}" />
+      <select class="kind-select">${kindOptions(c.kind)}</select>
       <button class="rename-btn">Save</button>
     </div>
   `).join('')
@@ -127,8 +146,9 @@ async function loadCategoriesList() {
       const row = btn.closest('.settings-row')
       const id = row.dataset.id
       const newName = row.querySelector('.rename-input').value.trim()
+      const newKind = row.querySelector('.kind-select').value
 
-      const { error } = await supabase.from('categories').update({ name: newName }).eq('id', id)
+      const { error } = await supabase.from('categories').update({ name: newName, kind: newKind }).eq('id', id)
       if (error) {
         alert('Error renaming: ' + error.message)
       } else {
@@ -137,4 +157,4 @@ async function loadCategoriesList() {
       }
     })
   })
-}
+}
