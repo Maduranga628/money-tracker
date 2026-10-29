@@ -281,15 +281,10 @@ async function deleteLoan(loanCode) {
   })
   if (!confirmed) return
 
-  const { error: txDeleteError } = await supabase.from('transactions').delete().eq('loan_code', loanCode)
-  if (txDeleteError) {
-    await showAlert('Unable to delete the linked transactions: ' + txDeleteError.message)
-    return
-  }
-
-  const { error: loanDeleteError } = await supabase.from('loans').delete().eq('loan_code', loanCode)
-  if (loanDeleteError) {
-    await showAlert('Unable to delete the loan: ' + loanDeleteError.message)
+  // One call: the loan, its opening transaction and its repayments go together, or not at all.
+  const { error } = await supabase.rpc('delete_loan', { p_loan_code: loanCode })
+  if (error) {
+    await showAlert('Unable to delete the loan: ' + error.message)
     return
   }
 
@@ -322,7 +317,7 @@ async function renderNewLoan() {
   getRoot().innerHTML = `${backLink('Loans')}<div class="group skeleton-card" style="height: 220px"></div>`
   document.getElementById('back-btn').addEventListener('click', renderLoansTab)
 
-  const { loansAccountId, selectable, catId } = await fetchRefs()
+  const { loansAccountId, selectable } = await fetchRefs()
   const root = getRoot()
   if (!root) return
 
@@ -397,46 +392,22 @@ async function renderNewLoan() {
     submitBtn.disabled = true
     statusEl.textContent = ''
 
-    const { data: existing } = await supabase
-      .from('loans')
-      .select('loan_code')
-      .order('loan_code', { ascending: false })
-      .limit(1)
-
-    let nextNum = 1
-    if (existing && existing.length > 0) {
-      nextNum = parseInt(existing[0].loan_code.replace('L', ''), 10) + 1
-    }
-    const newCode = 'L' + String(nextNum).padStart(4, '0')
-
-    const { error: loanError } = await supabase.from('loans').insert({
-      loan_code: newCode, date, person, type, description, amount, notes
+    // One call: the database saves the loan AND its opening transaction together,
+    // or saves nothing at all. It also picks the next loan code.
+    const { error } = await supabase.rpc('create_loan', {
+      p_date: date,
+      p_person: person,
+      p_type: type,
+      p_description: description,
+      p_amount: Number(amount),
+      p_notes: notes,
+      p_account_id: Number(accountId),
     })
 
-    if (loanError) {
-      statusEl.textContent = 'Error: ' + loanError.message
+    if (error) {
+      statusEl.textContent = 'Nothing was saved. ' + error.message
       statusEl.className = 'error'
       submitBtn.disabled = false
-      return
-    }
-
-    const fromId = type === 'Given' ? accountId : loansAccountId
-    const toId = type === 'Given' ? loansAccountId : accountId
-    const category = type === 'Given' ? 'Loan Given' : 'Loan Received'
-
-    const { error: txError } = await supabase.from('transactions').insert({
-      date,
-      description: `Loan ${type.toLowerCase()} - ${person}`,
-      category_id: catId(category),
-      from_account_id: fromId,
-      to_account_id: toId,
-      amount, notes,
-      loan_code: newCode
-    })
-
-    if (txError) {
-      statusEl.textContent = 'Loan saved, but transaction failed: ' + txError.message
-      statusEl.className = 'error'
       return
     }
 
@@ -712,34 +683,22 @@ async function renderEditLoan(loanCode) {
     submitBtn.disabled = true
     statusEl.textContent = ''
 
-    const { error: loanUpdateError } = await supabase.from('loans').update({
-      date, person, type, description, amount, notes
-    }).eq('loan_code', loanCode)
+    // One call: the loan and its opening transaction are updated together, or not at all.
+    const { error: updateError } = await supabase.rpc('update_loan', {
+      p_loan_code: loanCode,
+      p_date: date,
+      p_person: person,
+      p_type: type,
+      p_description: description,
+      p_amount: Number(amount),
+      p_notes: notes,
+      p_account_id: Number(accountId),
+    })
 
-    if (loanUpdateError) {
-      statusEl.textContent = 'Error: ' + loanUpdateError.message
+    if (updateError) {
+      statusEl.textContent = 'Nothing was changed. ' + updateError.message
       statusEl.className = 'error'
       submitBtn.disabled = false
-      return
-    }
-
-    const fromId = type === 'Given' ? accountId : refs.loansAccountId
-    const toId = type === 'Given' ? refs.loansAccountId : accountId
-    const category = type === 'Given' ? 'Loan Given' : 'Loan Received'
-
-    const { error: txUpdateError } = await supabase.from('transactions').update({
-      date,
-      description: `Loan ${type.toLowerCase()} - ${person}`,
-      category_id: refs.catId(category),
-      from_account_id: fromId,
-      to_account_id: toId,
-      amount,
-      notes
-    }).eq('id', opening.id)
-
-    if (txUpdateError) {
-      statusEl.textContent = 'Loan updated, but linked transaction failed: ' + txUpdateError.message
-      statusEl.className = 'error'
       return
     }
 
