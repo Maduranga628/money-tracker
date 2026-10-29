@@ -1,11 +1,14 @@
 import { supabase } from '../../supabaseClient.js'
-import { getMonthStartDay, currentPeriod } from '../periods.js'
+import { getMonthStartDay, periodAt } from '../periods.js'
 
 const fmt = (n) =>
   Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+const ICON_PREV = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>'
+const ICON_NEXT = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>'
 
 const signed = (n) => (n >= 0 ? '+' : '−') + fmt(Math.abs(n))
 
@@ -67,20 +70,11 @@ export async function renderDashboardTab() {
 
   const totalBalance = balances.reduce((sum, b) => sum + b.balance, 0)
 
-  // --- This period's income / expenses ---
+  // --- Income / expenses per period ---
   // A "month" runs from your start day (e.g. salary day) to the day before it next month.
-  const period = currentPeriod(monthStartDay)
-  const thisMonthTx = allTx.filter(t => t.date >= period.start && t.date < period.end)
-
-  const income = thisMonthTx
-    .filter(t => t.from && t.from.is_external)
-    .reduce((sum, t) => sum + Number(t.amount), 0)
-
-  const expenses = thisMonthTx
-    .filter(t => t.to && t.to.is_external)
-    .reduce((sum, t) => sum + Number(t.amount), 0)
-
-  const savings = income - expenses
+  // The arrows move between periods; Previous stops at your oldest transaction.
+  const earliestDate = allTx.reduce((min, t) => (t.date < min ? t.date : min), '9999-12-31')
+  let periodOffset = 0
 
   // --- Loans summary ---
   let totalOwedToMe = 0
@@ -105,20 +99,9 @@ export async function renderDashboardTab() {
       <section class="hero">
         <div class="hero-label">Total balance</div>
         <div class="hero-amount">${fmt(totalBalance)}</div>
-        <div class="hero-sub"><span class="${tone(savings)}">${signed(savings)}</span> saved this month</div>
       </section>
 
-      <h3 class="section-title">${period.label}</h3>
-      <div class="stat-row">
-        <div class="stat">
-          <span class="stat-label">Income</span>
-          <span class="stat-value pos">${fmt(income)}</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Expenses</span>
-          <span class="stat-value neg">${fmt(expenses)}</span>
-        </div>
-      </div>
+      <div id="period-block"></div>
 
       <h3 class="section-title">Accounts</h3>
       <div class="group">
@@ -139,4 +122,55 @@ export async function renderDashboardTab() {
       </div>
     </div>
   `
+
+  const drawPeriod = (focusId) => {
+    const period = periodAt(monthStartDay, periodOffset)
+    const periodTx = allTx.filter(t => t.date >= period.start && t.date < period.end)
+
+    const income = periodTx
+      .filter(t => t.from && t.from.is_external)
+      .reduce((sum, t) => sum + Number(t.amount), 0)
+
+    const expenses = periodTx
+      .filter(t => t.to && t.to.is_external)
+      .reduce((sum, t) => sum + Number(t.amount), 0)
+
+    const savings = income - expenses
+    const canGoBack = earliestDate < period.start
+    const canGoForward = periodOffset < 0
+
+    document.getElementById('period-block').innerHTML = `
+      <div class="period-nav">
+        <button type="button" class="icon-btn" id="period-prev" aria-label="Previous period"${canGoBack ? '' : ' disabled'}>${ICON_PREV}</button>
+        <div class="period-label" aria-live="polite">${period.label}</div>
+        <button type="button" class="icon-btn" id="period-next" aria-label="Next period"${canGoForward ? '' : ' disabled'}>${ICON_NEXT}</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat">
+          <span class="stat-label">Income</span>
+          <span class="stat-value pos">${fmt(income)}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Expenses</span>
+          <span class="stat-value neg">${fmt(expenses)}</span>
+        </div>
+      </div>
+      <div class="stat stat-wide">
+        <span class="stat-label">Saved</span>
+        <span class="stat-value ${tone(savings)}">${signed(savings)}</span>
+      </div>
+    `
+
+    document.getElementById('period-prev').addEventListener('click', () => { periodOffset -= 1; drawPeriod('period-prev') })
+    document.getElementById('period-next').addEventListener('click', () => { periodOffset += 1; drawPeriod('period-next') })
+
+    // The buttons are redrawn, so give keyboard focus back to the one that was used.
+    if (focusId) {
+      const target = document.getElementById(focusId)
+      if (target && !target.disabled) target.focus()
+    }
+  }
+
+  drawPeriod()
 }

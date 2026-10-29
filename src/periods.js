@@ -49,17 +49,20 @@ function startInMonth(year, month0, day) {
 }
 
 /**
- * The period that contains `today`.
+ * The period that contains `today`, moved by `offset` whole periods
+ * (0 = current, -1 = the one before, ...).
  * Returns { start, end, label } where start is inclusive, end is exclusive
  * (both 'YYYY-MM-DD'), and label is for display.
  */
-export function currentPeriod(startDay, today = new Date()) {
+export function periodAt(startDay, offset = 0, today = new Date()) {
   const day = clampDay(startDay)
   const t = new Date(today.getFullYear(), today.getMonth(), today.getDate())
 
-  let start = startInMonth(t.getFullYear(), t.getMonth(), day)
-  if (t < start) start = startInMonth(t.getFullYear(), t.getMonth() - 1, day)
-  const end = startInMonth(start.getFullYear(), start.getMonth() + 1, day)
+  let current = startInMonth(t.getFullYear(), t.getMonth(), day)
+  if (t < current) current = startInMonth(t.getFullYear(), t.getMonth() - 1, day)
+
+  const start = startInMonth(current.getFullYear(), current.getMonth() + offset, day)
+  const end = startInMonth(current.getFullYear(), current.getMonth() + offset + 1, day)
 
   let label
   if (day === 1) {
@@ -77,3 +80,5 @@ export function currentPeriod(startDay, today = new Date()) {
 
   return { start: iso(start), end: iso(end), label }
 }
+
+export const currentPeriod = (startDay, today = new Date()) => periodAt(startDay, 0, today)

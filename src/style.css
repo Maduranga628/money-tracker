@@ -426,6 +426,26 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 .stat-label { font-size: 13px; color: var(--label-2); }
 .stat-value { font-size: 22px; line-height: 28px; font-weight: 600; }
 
+.stat-wide { margin-top: 12px; }
+
+.period-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20px 0 8px;
+}
+
+.period-label {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.period-nav .icon-btn { color: var(--tint); }
+.period-nav .icon-btn:disabled { color: var(--label-3); cursor: default; }
+.period-nav .icon-btn:disabled:active { background: none; }
+
 .pos { color: var(--green); }
 .neg { color: var(--red); }
 
