@@ -1,4 +1,5 @@
 import { supabase } from '../../supabaseClient.js'
+import { getMonthStartDay, currentPeriod } from '../periods.js'
 
 const fmt = (n) =>
   Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -29,7 +30,7 @@ export async function renderDashboardTab() {
   const content = document.getElementById('tab-content')
   renderSkeleton(content)
 
-  const [accountsRes, txRes, loansRes, loanTxRes] = await Promise.all([
+  const [accountsRes, txRes, loansRes, loanTxRes, monthStartDay] = await Promise.all([
     supabase.from('accounts').select('*').eq('is_external', false).order('name'),
     supabase
       .from('transactions')
@@ -39,6 +40,7 @@ export async function renderDashboardTab() {
       .from('transactions')
       .select('loan_code, amount, categories(name)')
       .not('loan_code', 'is', null),
+    getMonthStartDay(),
   ])
 
   const failed = [accountsRes, txRes, loansRes, loanTxRes].find(r => r.error)
@@ -65,13 +67,10 @@ export async function renderDashboardTab() {
 
   const totalBalance = balances.reduce((sum, b) => sum + b.balance, 0)
 
-  // --- This month's income / expenses ---
-  const now = new Date()
-  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
-  const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-  const monthEnd = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}-01`
-
-  const thisMonthTx = allTx.filter(t => t.date >= monthStart && t.date < monthEnd)
+  // --- This period's income / expenses ---
+  // A "month" runs from your start day (e.g. salary day) to the day before it next month.
+  const period = currentPeriod(monthStartDay)
+  const thisMonthTx = allTx.filter(t => t.date >= period.start && t.date < period.end)
 
   const income = thisMonthTx
     .filter(t => t.from && t.from.is_external)
@@ -99,7 +98,6 @@ export async function renderDashboardTab() {
   const loanNet = totalOwedToMe - totalIOwe
 
   // --- Render ---
-  const monthLabel = now.toLocaleString('default', { month: 'long', year: 'numeric' })
   const tone = (n) => (n >= 0 ? 'pos' : 'neg')
 
   content.innerHTML = `
@@ -107,10 +105,10 @@ export async function renderDashboardTab() {
       <section class="hero">
         <div class="hero-label">Total balance</div>
         <div class="hero-amount">${fmt(totalBalance)}</div>
-        <div class="hero-sub"><span class="${tone(savings)}">${signed(savings)}</span> saved in ${monthLabel}</div>
+        <div class="hero-sub"><span class="${tone(savings)}">${signed(savings)}</span> saved this month</div>
       </section>
 
-      <h3 class="section-title">${monthLabel}</h3>
+      <h3 class="section-title">${period.label}</h3>
       <div class="stat-row">
         <div class="stat">
           <span class="stat-label">Income</span>

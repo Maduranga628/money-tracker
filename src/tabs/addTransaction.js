@@ -1,4 +1,6 @@
 import { supabase } from '../../supabaseClient.js'
+import { todayLocal } from '../ui.js'
+import { isLoanCategory } from '../categories.js'
 
 export async function renderAddTransactionTab() {
   const content = document.getElementById('tab-content')
@@ -53,10 +55,12 @@ export async function renderAddTransactionTab() {
     </form>
   `
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = todayLocal()
   document.getElementById('date').value = today
 
-  const { data: categories } = await supabase.from('categories').select('*').order('name')
+  const { data: allCategories } = await supabase.from('categories').select('*').order('name')
+  // Loan categories belong to the Loans tab, so they aren't offered here.
+  const categories = allCategories.filter(c => !isLoanCategory(c))
   const { data: accounts } = await supabase.from('accounts').select('*').order('name')
 
   const categorySelect = document.getElementById('category')

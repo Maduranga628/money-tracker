@@ -1,5 +1,6 @@
 import { supabase } from '../../supabaseClient.js'
 import { showAlert } from '../ui.js'
+import { getMonthStartDay, setMonthStartDay } from '../periods.js'
 
 // Category kinds drive the auto-fill on the Add Transaction tab.
 const CATEGORY_KINDS = [
@@ -18,6 +19,12 @@ function kindOptions(selected) {
     .join('')
 }
 
+const ordinal = (n) => {
+  const rem100 = n % 100
+  if (rem100 >= 11 && rem100 <= 13) return `${n}th`
+  return `${n}${({ 1: 'st', 2: 'nd', 3: 'rd' })[n % 10] || 'th'}`
+}
+
 const CHECK = '<svg class="saved-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
 
 function flashSaved(row) {
@@ -29,6 +36,10 @@ export async function renderSettingsTab() {
   const content = document.getElementById('tab-content')
   content.innerHTML = `
     <div class="settings">
+      <h3 class="section-title">Month</h3>
+      <div class="group" id="general-list"></div>
+      <p class="section-footer">The Dashboard counts income and spending from this day to the day before it next month, so a salary on the 15th starts a new month on the 15th. Choose 1st for calendar months.</p>
+
       <h3 class="section-title">Accounts</h3>
       <div class="group" id="accounts-list"></div>
       <p class="section-footer">Changes save automatically. External stands for a source or destination of money, such as income or spending. It isn’t an account you hold.</p>
@@ -77,7 +88,7 @@ export async function renderSettingsTab() {
     </div>
   `
 
-  await Promise.all([loadAccountsList(), loadCategoriesList()])
+  await Promise.all([loadGeneralSettings(), loadAccountsList(), loadCategoriesList()])
 
   document.getElementById('logout-btn').addEventListener('click', () => {
     document.dispatchEvent(new CustomEvent('app:logout'))
@@ -120,6 +131,33 @@ export async function renderSettingsTab() {
       document.getElementById('add-category-form').reset()
       setTimeout(() => { statusEl.textContent = '' }, 2000)
       loadCategoriesList()
+    }
+  })
+}
+
+async function loadGeneralSettings() {
+  const listEl = document.getElementById('general-list')
+  const day = await getMonthStartDay()
+  const options = Array.from({ length: 31 }, (_, i) => i + 1)
+    .map(n => `<option value="${n}"${n === day ? ' selected' : ''}>${ordinal(n)}</option>`)
+    .join('')
+
+  listEl.innerHTML = `
+    <div class="field-row settings-row">
+      <label for="month-start-day">Month starts on</label>
+      <select id="month-start-day" class="day-select">${options}</select>
+      ${CHECK}
+    </div>
+  `
+
+  const row = listEl.querySelector('.settings-row')
+  document.getElementById('month-start-day').addEventListener('change', async (e) => {
+    const error = await setMonthStartDay(e.target.value)
+    if (error) {
+      await showAlert('Unable to save this setting: ' + error.message)
+      loadGeneralSettings()
+    } else {
+      flashSaved(row)
     }
   })
 }

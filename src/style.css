@@ -241,7 +241,7 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 /* Base = prominent (one per view). :where() keeps specificity low so
    the variants below always win. */
-:where(.form-box, .entry) button,
+:where(.entry) button,
 .login-box button,
 .add-form button,
 .load-more-btn {
@@ -259,11 +259,10 @@ body.scrolled .scroll-edge-top { opacity: 1; }
   transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
 }
 
-:where(.form-box, .entry) button:active,
+:where(.entry) button:active,
 .login-box button:active,
 .add-form button:active,
 .load-more-btn:active,
-.loan-card-actions button:active,
 .danger-btn:active {
   opacity: 0.8;
   transform: scale(0.98);
@@ -328,47 +327,6 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 .error { color: var(--red); font-size: 14px; }
 .success { color: var(--green); font-size: 14px; font-weight: 600; }
-
-.form-box, .loan-card {
-  background: var(--cell);
-  border-radius: var(--radius-card);
-}
-
-.form-box {
-  margin: 0 0 16px;
-  padding: 20px;
-}
-
-.form-box h2, .history h2, .loans-list h2 {
-  margin: 0 0 4px;
-  font-size: 20px;
-  line-height: 25px;
-  font-weight: 600;
-}
-
-.history > h2, .loans-list > h2 { margin: 24px 4px 12px; }
-
-.form-box label {
-  display: block;
-  margin-top: 14px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--label-2);
-}
-
-.form-box input, .form-box select {
-  width: 100%;
-  margin-top: 6px;
-  padding: 12px 14px;
-  box-sizing: border-box;
-  border: none;
-  border-radius: var(--radius-field);
-  background: var(--fill);
-  color: var(--label);
-  font-size: 17px;
-}
-
-.form-box input[type="checkbox"] { width: auto; margin: 0; }
 
 /* ---------- Shared: grouped lists, skeletons ---------- */
 
@@ -603,74 +561,171 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 /* ---------- Loans ---------- */
 
-.loans-list { margin: 0; }
-
-.loan-card {
-  padding: 16px;
-  margin-bottom: 12px;
-  font-size: 15px;
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
-.loan-card-header {
-  display: flex;
-  justify-content: space-between;
+.pill-btn {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 6px;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
 }
+
+.pill-btn:active { opacity: 0.8; transform: scale(0.98); }
+.pill-btn.primary { background: var(--tint); color: #fff; }
+.pill-btn.gray { background: var(--fill); color: var(--tint); }
+.pill-btn.danger { background: var(--fill); color: var(--red); }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0 0 4px -6px;
+  padding: 0 10px 0 2px;
+  border: none;
+  background: none;
+  color: var(--tint);
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.back-link .icon { width: 24px; height: 24px; }
+
+.loan-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.loan-balance {
+  font-size: 17px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.loan-caption { font-size: 13px; color: var(--label-2); }
+
+.progress {
+  height: 4px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: var(--fill-strong);
+  overflow: hidden;
+}
+
+.progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--green);
+}
+
+.progress-large { height: 6px; margin-top: 14px; }
 
 .loan-status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 999px;
   color: #fff;
+  vertical-align: 1px;
 }
 
 .status-Outstanding { background: var(--red); }
 .status-PartiallyPaid { background: var(--orange); }
 .status-Settled { background: var(--green); }
 
-.loan-notes { color: var(--label-2); font-size: 13px; margin-top: 4px; }
+.row-right { text-align: right; overflow-wrap: anywhere; }
+.row > span:first-child.row-muted { flex-shrink: 0; }
 
-.loan-card-actions { display: flex; gap: 8px; margin-top: 12px; }
+.repay-row { padding-right: 6px; }
 
-.loan-card-actions button {
-  flex: 1;
-  min-height: 40px;
+.icon-btn {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: 999px;
-  background: var(--fill);
-  font-size: 15px;
-  font-weight: 600;
+  background: none;
+  color: var(--label-2);
   cursor: pointer;
 }
 
-.loan-edit-btn { color: var(--tint); }
-.loan-delete-btn { color: var(--red); }
+.icon-btn .icon { width: 20px; height: 20px; }
+.icon-btn.danger { color: var(--red); }
+.icon-btn:active { background: var(--fill); }
 
-.repayments-list {
-  margin-top: 10px;
-  border-top: 0.5px solid var(--separator);
-  padding-top: 6px;
+.detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
 }
 
-.repayment-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.detail-actions .pill-btn { width: 100%; }
+
+.amount-hint {
+  margin-top: 2px;
   font-size: 13px;
   color: var(--label-2);
-  padding: 4px 0;
 }
 
-.repayment-delete-btn {
-  background: none;
-  border: none;
-  color: var(--red);
-  cursor: pointer;
-  font-size: 14px;
-  padding: 4px 8px;
+/* Segmented control (I Lent / I Borrowed) */
+.segmented {
+  display: flex;
+  padding: 3px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  background: var(--fill);
+  --segment-selected: var(--cell);
 }
+
+@media (prefers-color-scheme: dark) {
+  .segmented { --segment-selected: rgba(120, 120, 128, 0.5); }
+}
+
+.segmented label { position: relative; flex: 1; display: block; }
+
+.segmented input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented span {
+  display: block;
+  padding: 9px 0;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.segmented input:checked + span {
+  background: var(--segment-selected);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+}
+
+.segmented input:focus-visible + span { outline: 2px solid var(--tint); outline-offset: 1px; }
 
 /* ---------- Add Transaction (grouped form) ---------- */
 
@@ -867,12 +922,18 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 body:has(#edit-tx-form) .tabbar,
 body:has(#edit-tx-form) .scroll-edge-bottom,
 body:has(#edit-loan-form) .tabbar,
-body:has(#edit-loan-form) .scroll-edge-bottom {
+body:has(#edit-loan-form) .scroll-edge-bottom,
+body:has(#new-loan-form) .tabbar,
+body:has(#new-loan-form) .scroll-edge-bottom,
+body:has(#repay-form) .tabbar,
+body:has(#repay-form) .scroll-edge-bottom {
   display: none;
 }
 
 body:has(#edit-tx-form) #tab-content,
-body:has(#edit-loan-form) #tab-content {
+body:has(#edit-loan-form) #tab-content,
+body:has(#new-loan-form) #tab-content,
+body:has(#repay-form) #tab-content {
   padding-bottom: calc(32px + env(safe-area-inset-bottom));
 }
 

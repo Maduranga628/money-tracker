@@ -82,3 +82,17 @@ export function showAlert(message, title = 'Something Went Wrong') {
     `,
   }).then(() => undefined)
 }
+
+/** Update the large title and the inline (scrolled) title together. */
+export function setPageTitle(text) {
+  const large = document.getElementById('large-title')
+  const inline = document.getElementById('navbar-title')
+  if (large) large.textContent = text
+  if (inline) inline.textContent = text
+}
+
+/** Today as YYYY-MM-DD in the user's own time zone (toISOString would use UTC). */
+export function todayLocal() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}

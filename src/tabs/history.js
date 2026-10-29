@@ -1,5 +1,6 @@
 import { supabase } from '../../supabaseClient.js'
-import { confirmDialog, showAlert } from '../ui.js'
+import { confirmDialog, showAlert, setPageTitle } from '../ui.js'
+import { isLoanCategory } from '../categories.js'
 
 const PAGE_SIZE = 25
 
@@ -37,6 +38,7 @@ let lastDate = null       // date of the section currently being filled
 let currentGroup = null   // the .group element for that date
 
 export async function renderHistoryTab() {
+  setPageTitle('History')
   historyOffset = 0
   currentFilters = { accountId: '', categoryId: '', dateFrom: '', dateTo: '' }
   generation++
@@ -269,13 +271,15 @@ async function renderEditTransaction(id) {
   }
 
   const t = txRes.data
-  const categories = categoriesRes.data || []
+  // Loan categories belong to the Loans tab; keep one only if this transaction already uses it.
+  const categories = (categoriesRes.data || []).filter(c => !isLoanCategory(c) || String(c.id) === String(t.category_id))
   const accounts = accountsRes.data || []
 
   const options = (items, selected) =>
     '<option value="">Select</option>' +
     items.map(i => `<option value="${i.id}"${String(i.id) === String(selected) ? ' selected' : ''}>${esc(i.name)}</option>`).join('')
 
+  setPageTitle('Edit Transaction')
   window.scrollTo(0, 0)
   content.innerHTML = `
     <form id="edit-tx-form" class="entry">
