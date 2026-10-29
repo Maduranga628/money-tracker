@@ -43,11 +43,19 @@ export async function renderSettingsTab() {
         </form>
         <p id="category-status"></p>
       </div>
+
+      <div class="form-box">
+        <button type="button" id="logout-btn" class="danger-btn">Log Out</button>
+      </div>
     </div>
   `
 
   await loadAccountsList()
   await loadCategoriesList()
+
+  document.getElementById('logout-btn').addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('app:logout'))
+  })
 
   document.getElementById('add-account-form').addEventListener('submit', async (e) => {
     e.preventDefault()
