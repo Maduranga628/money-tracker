@@ -241,10 +241,9 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 /* Base = prominent (one per view). :where() keeps specificity low so
    the variants below always win. */
-:where(.form-box, .filter-box, .entry) button,
+:where(.form-box, .entry) button,
 .login-box button,
-.inline-add-form button,
-.settings-row .rename-btn,
+.add-form button,
 .load-more-btn {
   width: 100%;
   min-height: 50px;
@@ -260,10 +259,9 @@ body.scrolled .scroll-edge-top { opacity: 1; }
   transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
 }
 
-:where(.form-box, .filter-box, .entry) button:active,
+:where(.form-box, .entry) button:active,
 .login-box button:active,
-.inline-add-form button:active,
-.settings-row .rename-btn:active,
+.add-form button:active,
 .load-more-btn:active,
 .loan-card-actions button:active,
 .danger-btn:active {
@@ -272,10 +270,9 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 }
 
 /* Secondary: grey fill + tint label */
-.inline-add-form button,
+.add-form button,
 .secondary-btn,
-.load-more-btn,
-.settings-row .rename-btn {
+.load-more-btn {
   background: var(--fill);
   color: var(--tint);
 }
@@ -332,7 +329,7 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 .error { color: var(--red); font-size: 14px; }
 .success { color: var(--green); font-size: 14px; font-weight: 600; }
 
-.form-box, .dash-card, .loan-card, .history-row {
+.form-box, .loan-card {
   background: var(--cell);
   border-radius: var(--radius-card);
 }
@@ -351,7 +348,7 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 .history > h2, .loans-list > h2 { margin: 24px 4px 12px; }
 
-.form-box label, .filter-box label {
+.form-box label {
   display: block;
   margin-top: 14px;
   font-size: 13px;
@@ -359,9 +356,7 @@ body.scrolled .scroll-edge-top { opacity: 1; }
   color: var(--label-2);
 }
 
-.form-box input, .form-box select,
-.filter-box select, .filter-box input,
-.inline-add-form input[type="text"], .inline-add-form select {
+.form-box input, .form-box select {
   width: 100%;
   margin-top: 6px;
   padding: 12px 14px;
@@ -374,8 +369,6 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 }
 
 .form-box input[type="checkbox"] { width: auto; margin: 0; }
-
-.filter-box { margin-bottom: 20px; }
 
 /* ---------- Shared: grouped lists, skeletons ---------- */
 
@@ -406,7 +399,8 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 /* Hairline separator inset to the text edge (iOS style) */
 .row + .row,
-.field-row + .field-row {
+.field-row + .field-row,
+.tx-row + .tx-row {
   background: linear-gradient(var(--separator), var(--separator)) 16px 0 / calc(100% - 16px) 0.5px no-repeat;
 }
 
@@ -481,41 +475,131 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 .history { margin: 0; }
 
-.history-row {
-  padding: 14px 16px;
-  margin-bottom: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: opacity 0.2s var(--ease);
-}
-
-.history-row:active { opacity: 0.7; }
-.history-row.locked { cursor: default; opacity: 0.85; }
-
-.history-row-top {
+.filter-bar {
   display: flex;
-  justify-content: space-between;
-  font-size: 17px;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
 }
 
-.history-row-bottom {
-  color: var(--label-2);
-  font-size: 13px;
-  margin-top: 4px;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--fill);
+  color: var(--tint);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.history-notes {
-  color: var(--label-2);
-  font-size: 13px;
-  margin-top: 4px;
-  font-style: italic;
-}
+.chip[aria-expanded="true"] { background: var(--fill-strong); }
+.chip .icon { width: 18px; height: 18px; }
 
-.loan-lock-note {
-  color: var(--orange);
+.chip-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: var(--tint);
+  color: #fff;
   font-size: 12px;
-  margin-top: 6px;
 }
+
+.chip-plain {
+  min-height: 40px;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  color: var(--tint);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-panel { margin-bottom: 8px; }
+
+.history .section-title:first-child,
+#history-list > .section-title:first-child { margin-top: 12px; }
+
+.tx-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 16px;
+  box-sizing: border-box;
+  border: none;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tx-row:active { background-color: var(--fill); }
+.tx-row.locked { cursor: default; }
+.tx-row.locked:active { background-color: transparent; }
+
+.tx-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.tx-title {
+  font-size: 17px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tx-sub, .tx-note, .tx-lock { font-size: 13px; color: var(--label-2); }
+.tx-sub { overflow-wrap: anywhere; }
+.tx-note { font-style: italic; }
+
+.tx-lock {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--orange);
+}
+
+.inline-icon { width: 13px; height: 13px; }
+
+.tx-amount {
+  flex-shrink: 0;
+  font-size: 17px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.chevron { flex-shrink: 0; width: 16px; height: 16px; color: var(--label-3); }
+
+.load-more-btn { margin-top: 16px; }
+.history-status { text-align: center; }
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px 24px;
+  text-align: center;
+}
+
+.empty-icon { width: 56px; height: 56px; color: var(--label-3); }
+.empty h3 { margin: 16px 0 4px; font-size: 20px; font-weight: 600; }
+.empty p { margin: 0; font-size: 15px; color: var(--label-2); }
 
 /* ---------- Loans ---------- */
 
@@ -586,70 +670,6 @@ body.scrolled .scroll-edge-top { opacity: 1; }
   cursor: pointer;
   font-size: 14px;
   padding: 4px 8px;
-}
-
-/* ---------- Settings ---------- */
-
-.settings { margin: 0; }
-
-.settings-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 0;
-  border-bottom: 0.5px solid var(--separator);
-}
-
-.settings-row .rename-input {
-  flex: 1;
-  min-width: 0;
-  margin-top: 0;
-  padding: 10px 12px;
-  font-size: 15px;
-}
-
-.settings-row .rename-btn {
-  width: auto;
-  flex-shrink: 0;
-  min-height: 40px;
-  margin-top: 0;
-  padding: 0 16px;
-  font-size: 15px;
-  white-space: nowrap;
-}
-
-.settings-row .tag {
-  font-size: 11px;
-  background: var(--fill);
-  color: var(--label-2);
-  padding: 3px 8px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-.settings-row .kind-select {
-  width: auto;
-  flex-shrink: 0;
-  margin-top: 0;
-  padding: 10px 8px;
-  font-size: 15px;
-}
-
-.inline-add-form {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 0.5px solid var(--separator);
-}
-
-.inline-add-form input[type="text"], .inline-add-form select { margin: 0 0 8px; }
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--label-2);
-  margin: 0 0 8px;
 }
 
 /* ---------- Add Transaction (grouped form) ---------- */
@@ -743,6 +763,105 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 .entry p { min-height: 20px; margin: 12px 0 0; text-align: center; }
 
+/* ---------- Settings ---------- */
+
+.settings { margin: 0; }
+
+.section-footer {
+  margin: 8px 16px 0;
+  font-size: 13px;
+  color: var(--label-2);
+}
+
+.settings-row { position: relative; }
+
+.settings-row .name-input { text-align: left; text-align-last: left; }
+
+.settings-row .kind-select { flex: 0 0 auto; }
+
+.settings-row .tag {
+  flex-shrink: 0;
+  font-size: 12px;
+  background: var(--fill);
+  color: var(--label-2);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.saved-mark {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--green);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+
+.settings-row.saved .saved-mark { opacity: 1; }
+
+.add-form { margin-top: 16px; }
+.add-form .entry-group { margin-bottom: 0; }
+.add-form p { min-height: 20px; margin: 8px 0 0; text-align: center; }
+
+.row-button {
+  width: 100%;
+  justify-content: center;
+  border: none;
+  background-color: transparent;
+  font: inherit;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.row-button.destructive { color: var(--red); }
+.row-button:active { background-color: var(--fill); }
+
+/* iOS-style switch */
+.switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 51px;
+  height: 31px;
+  margin-left: auto;
+}
+
+.field-row .switch input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--fill-strong);
+  transition: background 0.25s var(--ease);
+}
+
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 1px rgba(0, 0, 0, 0.16);
+  transition: transform 0.25s var(--ease);
+}
+
+.switch input:checked + .switch-track { background: var(--green); }
+.switch input:checked + .switch-track::after { transform: translateX(20px); }
+.switch input:focus-visible + .switch-track { outline: 2px solid var(--tint); outline-offset: 2px; }
+
 /* ---------- Edit screens: hide the tab bar so Update / Delete / Cancel stay reachable ---------- */
 
 body:has(#edit-tx-form) .tabbar,
@@ -755,6 +874,110 @@ body:has(#edit-loan-form) .scroll-edge-bottom {
 body:has(#edit-tx-form) #tab-content,
 body:has(#edit-loan-form) #tab-content {
   padding-bottom: calc(32px + env(safe-area-inset-bottom));
+}
+
+/* ---------- In-app dialogs (replace native confirm/alert) ---------- */
+
+[hidden] { display: none !important; }
+
+body.modal-open { overflow: hidden; }
+
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.25s var(--ease);
+}
+
+.sheet-scrim.open { opacity: 1; }
+
+.action-sheet {
+  width: min(100%, 420px);
+  box-sizing: border-box;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  transform: translateY(24px);
+  transition: transform 0.35s var(--ease);
+}
+
+.sheet-scrim.open .action-sheet { transform: none; }
+
+.action-group,
+.action-cancel,
+.alert-card {
+  background: color-mix(in srgb, var(--cell) 90%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.action-group { border-radius: 26px; overflow: hidden; }
+
+.action-head { padding: 18px 20px 14px; text-align: center; }
+.action-title { font-size: 15px; font-weight: 600; }
+.action-message { margin-top: 4px; font-size: 13px; color: var(--label-2); }
+
+.action-btn {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  border: none;
+  border-top: 0.5px solid var(--separator);
+  background: none;
+  color: var(--tint);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.action-btn.destructive { color: var(--red); }
+.action-btn:active { background: var(--fill); }
+
+.action-btn.action-cancel {
+  margin-top: 8px;
+  border: none;
+  border-radius: 26px;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--cell) 90%, transparent);
+}
+
+.action-btn.action-cancel:active { background: var(--cell); }
+
+.alert-card {
+  align-self: center;
+  width: min(calc(100% - 64px), 300px);
+  border-radius: 26px;
+  overflow: hidden;
+  text-align: center;
+  transform: scale(0.96);
+  transition: transform 0.3s var(--ease);
+}
+
+.sheet-scrim.open .alert-card { transform: none; }
+
+.alert-body { padding: 22px 20px 18px; }
+.alert-body .action-title { font-size: 17px; }
+.alert-body .action-message { font-size: 13px; }
+
+.alert-ok {
+  display: block;
+  width: 100%;
+  min-height: 50px;
+  border: none;
+  border-top: 0.5px solid var(--separator);
+  background: none;
+  color: var(--tint);
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.alert-ok:active { background: var(--fill); }
+
+@media (prefers-reduced-motion: reduce) {
+  .action-sheet, .alert-card { transform: none; }
 }
 
 /* ---------- Motion preferences ---------- */

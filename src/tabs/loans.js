@@ -1,4 +1,5 @@
 import { supabase } from '../../supabaseClient.js'
+import { confirmDialog, showAlert } from '../ui.js'
 
 export async function renderLoansTab() {
   const content = document.getElementById('tab-content')
@@ -320,12 +321,16 @@ async function loadLoansList() {
 }
 
 async function deleteRepayment(txId) {
-  const confirmed = confirm('Delete this repayment? The loan balance will increase back accordingly.')
+  const confirmed = await confirmDialog({
+    title: 'Delete Repayment?',
+    message: 'The loan balance will increase back accordingly.',
+    confirmLabel: 'Delete',
+  })
   if (!confirmed) return
 
   const { error } = await supabase.from('transactions').delete().eq('id', txId)
   if (error) {
-    alert('Error: ' + error.message)
+    await showAlert(error.message)
     return
   }
   loadLoansList()
@@ -333,20 +338,22 @@ async function deleteRepayment(txId) {
 }
 
 async function deleteLoan(loanCode) {
-  const confirmed = confirm(
-    `Delete loan ${loanCode}? This will also delete its opening transaction and ALL repayment transactions linked to it. This cannot be undone.`
-  )
+  const confirmed = await confirmDialog({
+    title: `Delete Loan ${loanCode}?`,
+    message: 'This also deletes its opening transaction and all of its repayments. This can’t be undone.',
+    confirmLabel: 'Delete Loan',
+  })
   if (!confirmed) return
 
   const { error: txDeleteError } = await supabase.from('transactions').delete().eq('loan_code', loanCode)
   if (txDeleteError) {
-    alert('Error deleting linked transactions: ' + txDeleteError.message)
+    await showAlert('Unable to delete the linked transactions: ' + txDeleteError.message)
     return
   }
 
   const { error: loanDeleteError } = await supabase.from('loans').delete().eq('loan_code', loanCode)
   if (loanDeleteError) {
-    alert('Error deleting loan: ' + loanDeleteError.message)
+    await showAlert('Unable to delete the loan: ' + loanDeleteError.message)
     return
   }
 
@@ -359,7 +366,7 @@ async function renderEditLoan(loanCode) {
 
   const { data: loan, error: loanError } = await supabase.from('loans').select('*').eq('loan_code', loanCode).single()
   if (loanError) {
-    alert('Could not load loan: ' + loanError.message)
+    await showAlert('Could not load this loan: ' + loanError.message)
     return
   }
 
@@ -373,7 +380,7 @@ async function renderEditLoan(loanCode) {
   const opening = (openingTx || []).find(t => t.categories && (t.categories.name === 'Loan Given' || t.categories.name === 'Loan Received'))
 
   if (!opening) {
-    alert('Could not find the opening transaction for this loan — cannot safely edit. Please contact support or edit directly in Supabase.')
+    await showAlert('The opening transaction for this loan could not be found, so it can’t be edited safely. Edit it directly in Supabase.')
     return
   }
 
