@@ -241,7 +241,7 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 /* Base = prominent (one per view). :where() keeps specificity low so
    the variants below always win. */
-:where(.form-box, .filter-box) button,
+:where(.form-box, .filter-box, .entry) button,
 .login-box button,
 .inline-add-form button,
 .settings-row .rename-btn,
@@ -260,7 +260,7 @@ body.scrolled .scroll-edge-top { opacity: 1; }
   transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
 }
 
-:where(.form-box, .filter-box) button:active,
+:where(.form-box, .filter-box, .entry) button:active,
 .login-box button:active,
 .inline-add-form button:active,
 .settings-row .rename-btn:active,
@@ -377,35 +377,102 @@ body.scrolled .scroll-edge-top { opacity: 1; }
 
 .filter-box { margin-bottom: 20px; }
 
+/* ---------- Shared: grouped lists, skeletons ---------- */
+
+.section-title {
+  margin: 24px 16px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--label-2);
+}
+
+.group {
+  background: var(--cell);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+  font-size: 17px;
+}
+
+/* Hairline separator inset to the text edge (iOS style) */
+.row + .row,
+.field-row + .field-row {
+  background: linear-gradient(var(--separator), var(--separator)) 16px 0 / calc(100% - 16px) 0.5px no-repeat;
+}
+
+.row-value, .stat-value, .hero-amount { font-variant-numeric: tabular-nums; }
+.row-muted { color: var(--label-2); }
+.row-strong { font-weight: 600; }
+
+.skeleton {
+  border-radius: 8px;
+  background: var(--fill);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-card {
+  background: var(--cell);
+  border-radius: var(--radius-card);
+}
+
+.skeleton-card .skeleton { background: var(--fill); }
+
+@keyframes pulse { 50% { opacity: 0.45; } }
+
 /* ---------- Dashboard ---------- */
 
 .dashboard { margin: 0; }
 
-.dash-card {
-  padding: 16px 20px;
-  margin-bottom: 16px;
-}
+.hero { padding: 4px 4px 4px; }
 
-.dash-card h2 {
-  margin: 0 0 6px;
+.hero-label {
   font-size: 15px;
-  font-weight: 600;
   color: var(--label-2);
 }
 
-.dash-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  font-size: 17px;
+.hero-amount {
+  margin-top: 2px;
+  font-size: 44px;
+  line-height: 50px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
-.dash-total {
-  border-top: 0.5px solid var(--separator);
+.hero-sub {
   margin-top: 6px;
-  padding-top: 12px;
-  font-weight: 600;
+  font-size: 15px;
+  color: var(--label-2);
 }
+
+.hero-sub .pos, .hero-sub .neg { font-weight: 600; }
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  background: var(--cell);
+  border-radius: var(--radius-card);
+}
+
+.stat-label { font-size: 13px; color: var(--label-2); }
+.stat-value { font-size: 22px; line-height: 28px; font-weight: 600; }
 
 .pos { color: var(--green); }
 .neg { color: var(--red); }
@@ -583,6 +650,111 @@ body.scrolled .scroll-edge-top { opacity: 1; }
   font-size: 13px;
   color: var(--label-2);
   margin: 0 0 8px;
+}
+
+/* ---------- Add Transaction (grouped form) ---------- */
+
+.entry { margin: 0; }
+
+.amount-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 16px 14px;
+  margin-bottom: 16px;
+  background: var(--cell);
+  border-radius: var(--radius-card);
+}
+
+.amount-card label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--label-2);
+}
+
+.amount-card input {
+  width: 100%;
+  margin-top: 2px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--label);
+  font-size: 48px;
+  line-height: 56px;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+
+.amount-card input:focus { outline: none; }
+.amount-card input::-webkit-outer-spin-button,
+.amount-card input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.amount-card input::placeholder { color: var(--label-3); }
+
+.entry-group {
+  background: var(--cell);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px;
+}
+
+.field-row label {
+  flex: 0 0 auto;
+  font-size: 17px;
+}
+
+.field-row input,
+.field-row select {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--label);
+  font-size: 17px;
+  text-align: right;
+  text-align-last: right;
+}
+
+.field-row input::placeholder { color: var(--label-3); }
+.field-row input:focus, .field-row select:focus { outline: none; }
+.field-row:focus-within { background-color: var(--fill); }
+
+.field-row select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 18px;
+  color: var(--tint);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='16' fill='none' stroke='%238e8e93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 6l3-3 3 3M2 10l3 3 3-3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+}
+
+.entry p { min-height: 20px; margin: 12px 0 0; text-align: center; }
+
+/* ---------- Edit screens: hide the tab bar so Update / Delete / Cancel stay reachable ---------- */
+
+body:has(#edit-tx-form) .tabbar,
+body:has(#edit-tx-form) .scroll-edge-bottom,
+body:has(#edit-loan-form) .tabbar,
+body:has(#edit-loan-form) .scroll-edge-bottom {
+  display: none;
+}
+
+body:has(#edit-tx-form) #tab-content,
+body:has(#edit-loan-form) #tab-content {
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
 }
 
 /* ---------- Motion preferences ---------- */

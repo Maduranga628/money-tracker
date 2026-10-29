@@ -3,40 +3,54 @@ import { supabase } from '../../supabaseClient.js'
 export async function renderAddTransactionTab() {
   const content = document.getElementById('tab-content')
   content.innerHTML = `
-    <div class="form-box">
-      <h2>Add Transaction</h2>
-      <form id="tx-form">
-        <label>Date</label>
-        <input type="date" id="date" required />
+    <form id="tx-form" class="entry">
+      <div class="amount-card">
+        <label for="amount">Amount</label>
+        <input type="number" id="amount" step="0.01" inputmode="decimal" placeholder="0.00" required />
+      </div>
 
-        <label>Description</label>
-        <input type="text" id="description" required />
+      <div class="entry-group">
+        <div class="field-row">
+          <label for="description">Description</label>
+          <input type="text" id="description" placeholder="What was it for?" required />
+        </div>
+        <div class="field-row">
+          <label for="category">Category</label>
+          <select id="category" required>
+            <option value="">Select</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label for="date">Date</label>
+          <input type="date" id="date" required />
+        </div>
+      </div>
 
-        <label>Category</label>
-        <select id="category" required>
-          <option value="">-- select --</option>
-        </select>
+      <div class="entry-group">
+        <div class="field-row">
+          <label for="from_account">From</label>
+          <select id="from_account" required>
+            <option value="">Select</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label for="to_account">To</label>
+          <select id="to_account" required>
+            <option value="">Select</option>
+          </select>
+        </div>
+      </div>
 
-        <label>From Account</label>
-        <select id="from_account" required>
-          <option value="">-- select --</option>
-        </select>
+      <div class="entry-group">
+        <div class="field-row">
+          <label for="notes">Notes</label>
+          <input type="text" id="notes" placeholder="Optional" />
+        </div>
+      </div>
 
-        <label>To Account</label>
-        <select id="to_account" required>
-          <option value="">-- select --</option>
-        </select>
-
-        <label>Amount</label>
-        <input type="number" id="amount" step="0.01" required />
-
-        <label>Notes</label>
-        <input type="text" id="notes" />
-
-        <button type="submit">Save</button>
-        <p id="save-status"></p>
-      </form>
-    </div>
+      <button type="submit">Save Transaction</button>
+      <p id="save-status" class="entry-status"></p>
+    </form>
   `
 
   const today = new Date().toISOString().split('T')[0]

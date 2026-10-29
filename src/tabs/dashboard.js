@@ -1,18 +1,56 @@
 import { supabase } from '../../supabaseClient.js'
 
+const fmt = (n) =>
+  Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+const esc = (s) =>
+  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+const signed = (n) => (n >= 0 ? '+' : '−') + fmt(Math.abs(n))
+
+function renderSkeleton(content) {
+  content.innerHTML = `
+    <div class="dashboard" aria-busy="true">
+      <div class="hero">
+        <div class="skeleton" style="width: 110px; height: 14px"></div>
+        <div class="skeleton" style="width: 220px; height: 40px; margin-top: 12px"></div>
+        <div class="skeleton" style="width: 150px; height: 14px; margin-top: 14px"></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat skeleton-card"><div class="skeleton" style="width: 60px; height: 12px"></div><div class="skeleton" style="width: 100px; height: 22px; margin-top: 10px"></div></div>
+        <div class="stat skeleton-card"><div class="skeleton" style="width: 60px; height: 12px"></div><div class="skeleton" style="width: 100px; height: 22px; margin-top: 10px"></div></div>
+      </div>
+      <div class="group skeleton-card" style="height: 150px"></div>
+    </div>
+  `
+}
+
 export async function renderDashboardTab() {
   const content = document.getElementById('tab-content')
-  content.innerHTML = `<div class="dashboard"><p>Loading...</p></div>`
+  renderSkeleton(content)
 
-  const { data: accounts } = await supabase
-    .from('accounts')
-    .select('*')
-    .eq('is_external', false)
-    .order('name')
+  const [accountsRes, txRes, loansRes, loanTxRes] = await Promise.all([
+    supabase.from('accounts').select('*').eq('is_external', false).order('name'),
+    supabase
+      .from('transactions')
+      .select('date, amount, from_account_id, to_account_id, from:accounts!transactions_from_account_id_fkey(name, is_external), to:accounts!transactions_to_account_id_fkey(name, is_external)'),
+    supabase.from('loans').select('*'),
+    supabase
+      .from('transactions')
+      .select('loan_code, amount, categories(name)')
+      .not('loan_code', 'is', null),
+  ])
 
-  const { data: allTx } = await supabase
-    .from('transactions')
-    .select('date, amount, from_account_id, to_account_id, from:accounts!transactions_from_account_id_fkey(name, is_external), to:accounts!transactions_to_account_id_fkey(name, is_external)')
+  const failed = [accountsRes, txRes, loansRes, loanTxRes].find(r => r.error)
+  if (failed) {
+    content.innerHTML = `<p class="error">Unable to load the dashboard: ${esc(failed.error.message)}</p>`
+    return
+  }
+
+  const accounts = accountsRes.data
+  const allTx = txRes.data
+  const loans = loansRes.data
+  const loanTx = loanTxRes.data
 
   // --- Account balances (all-time) ---
   const balances = accounts.map(acc => {
@@ -46,12 +84,6 @@ export async function renderDashboardTab() {
   const savings = income - expenses
 
   // --- Loans summary ---
-  const { data: loans } = await supabase.from('loans').select('*')
-  const { data: loanTx } = await supabase
-    .from('transactions')
-    .select('loan_code, amount, categories(name)')
-    .not('loan_code', 'is', null)
-
   let totalOwedToMe = 0
   let totalIOwe = 0
   loans.forEach(loan => {
@@ -64,44 +96,48 @@ export async function renderDashboardTab() {
     if (loan.type === 'Given') totalOwedToMe += balance
     else totalIOwe += balance
   })
+  const loanNet = totalOwedToMe - totalIOwe
 
   // --- Render ---
   const monthLabel = now.toLocaleString('default', { month: 'long', year: 'numeric' })
+  const tone = (n) => (n >= 0 ? 'pos' : 'neg')
 
   content.innerHTML = `
     <div class="dashboard">
-      <div class="dash-card">
-        <h2>Account Balances</h2>
-        ${balances.map(b => `
-          <div class="dash-row">
-            <span>${b.name}</span>
-            <span>${b.balance.toFixed(2)}</span>
-          </div>
-        `).join('')}
-        <div class="dash-row dash-total">
-          <span>Total</span>
-          <span>${totalBalance.toFixed(2)}</span>
+      <section class="hero">
+        <div class="hero-label">Total balance</div>
+        <div class="hero-amount">${fmt(totalBalance)}</div>
+        <div class="hero-sub"><span class="${tone(savings)}">${signed(savings)}</span> saved in ${monthLabel}</div>
+      </section>
+
+      <h3 class="section-title">${monthLabel}</h3>
+      <div class="stat-row">
+        <div class="stat">
+          <span class="stat-label">Income</span>
+          <span class="stat-value pos">${fmt(income)}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Expenses</span>
+          <span class="stat-value neg">${fmt(expenses)}</span>
         </div>
       </div>
 
-      <div class="dash-card">
-        <h2>${monthLabel}</h2>
-        <div class="dash-row"><span>Income</span><span class="pos">${income.toFixed(2)}</span></div>
-        <div class="dash-row"><span>Expenses</span><span class="neg">${expenses.toFixed(2)}</span></div>
-        <div class="dash-row dash-total">
-          <span>Savings</span>
-          <span class="${savings >= 0 ? 'pos' : 'neg'}">${savings.toFixed(2)}</span>
-        </div>
+      <h3 class="section-title">Accounts</h3>
+      <div class="group">
+        ${balances.length
+          ? balances.map(b => `
+            <div class="row">
+              <span>${esc(b.name)}</span>
+              <span class="row-value ${b.balance < 0 ? 'neg' : ''}">${fmt(b.balance)}</span>
+            </div>`).join('')
+          : '<div class="row"><span class="row-muted">No accounts yet</span></div>'}
       </div>
 
-      <div class="dash-card">
-        <h2>Loans</h2>
-        <div class="dash-row"><span>Owed to me</span><span class="pos">${totalOwedToMe.toFixed(2)}</span></div>
-        <div class="dash-row"><span>I owe</span><span class="neg">${totalIOwe.toFixed(2)}</span></div>
-        <div class="dash-row dash-total">
-          <span>Net</span>
-          <span class="${(totalOwedToMe - totalIOwe) >= 0 ? 'pos' : 'neg'}">${(totalOwedToMe - totalIOwe).toFixed(2)}</span>
-        </div>
+      <h3 class="section-title">Loans</h3>
+      <div class="group">
+        <div class="row"><span>Owed to me</span><span class="row-value pos">${fmt(totalOwedToMe)}</span></div>
+        <div class="row"><span>I owe</span><span class="row-value neg">${fmt(totalIOwe)}</span></div>
+        <div class="row row-strong"><span>Net</span><span class="row-value ${tone(loanNet)}">${signed(loanNet)}</span></div>
       </div>
     </div>
   `
